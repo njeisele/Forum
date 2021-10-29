@@ -1,0 +1,13 @@
+.mainContent {
+	width: 50vw;
+	margin-top: 10vh;
+	margin-left: 10vw;
+	margin-bottom: 20vh;
+}
+
+.post {
+	background-color: white;
+	border-radius: 5px;
+	height: 100px;
+	margin-bottom: 50px;
+}
