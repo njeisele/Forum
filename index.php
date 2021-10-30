@@ -12,7 +12,6 @@ require("Controllers/Mysql.php");
 
 $dbConn = new Mysql();
 $dbConn->dbConnect();
-$dbConn->query("SELECT * FROM passwords");
 
 
 print <<<EOF
@@ -25,22 +24,22 @@ print <<<EOF
 EOF;
 
 //include('authentication.php');
-
-switch ($parts['path']) {
-	case "/post":
-		print("hello");
+$parts = explode("/", $parts['path']);
+switch ($parts[1]) {
+	case "post":
+		include("Views/post.php");
 		break;
-	case "/feed":
-		include('posts.php');
+	case "feed":
+		include('Views/posts.php');
 		break;
-	case "/signin":
-		include('signin.php');
+	case "signin":
+		include('Views/signin.php');
 		break;
-	case "/createAccount":	
-		include('createAccount.php');
+	case "createAccount":	
+		include('Views/createAccount.php');
 		break;
-	case "/newPost":
-		include('NewPost.php');
+	case "newPost":
+		include('Views/NewPost.php');
 		break;
 }
 
