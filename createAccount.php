@@ -15,11 +15,13 @@ function validatePasswords($pass1, $pass2) {
 }
 
 if ($_REQUEST['username'] && $_REQUEST['password'] && $_REQUEST['password2']) {
+ 	
+	global $dbConn;
         $username = mysql_real_escape_string($_REQUEST['username']);
         $pass = mysql_real_escape_string($_REQUEST['password']);
 	$pass2 = mysql_real_escape_string($_REQUEST['password2']);
 	
-	$userExists = getSingle("SELECT COUNT(*) FROM passwords WHERE uid='$username'");
+	$userExists = $dbConn->getSingle("SELECT COUNT(*) FROM passwords WHERE uid='$username'");
 	$userLength = strlen($username);
 	if ($userExists > 0) {
 		print("Username unavailable");
@@ -31,7 +33,7 @@ if ($_REQUEST['username'] && $_REQUEST['password'] && $_REQUEST['password2']) {
 		print("Invalid password");
 	}
 	$hash = password_hash($pass, PASSWORD_DEFAULT);
-	query("INSERT INTO passwords (username, password) values ('$username', '$hash')");
+	$dbConn->query("INSERT INTO passwords (username, password) values ('$username', '$hash')");
 }
 
 

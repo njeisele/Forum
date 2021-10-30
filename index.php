@@ -8,27 +8,11 @@
 $URL = "http://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
 $parts = parse_url($URL);
 
-$dbhost = 'localhost';
-$dbuser = 'root';
-$dbpass = '';
-$dbname = 'forum';
-$conn = mysql_connect($dbhost, $dbuser, $dbpass);
+require("Controllers/Mysql.php");
 
-mysql_select_db($dbname, $conn);
-
-function query($query) {
-        global $conn;
-        return mysql_query($query, $conn);
-}
-
-
-
-function getSingle($query) {
-        $result = query($query);
-        $row = mysql_fetch_row($result);
-        return $row[0];
-}
-
+$dbConn = new Mysql();
+$dbConn->dbConnect();
+$dbConn->query("SELECT * FROM passwords");
 
 
 print <<<EOF
@@ -54,6 +38,9 @@ switch ($parts['path']) {
 		break;
 	case "/createAccount":	
 		include('createAccount.php');
+		break;
+	case "/newPost":
+		include('NewPost.php');
 		break;
 }
 

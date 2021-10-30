@@ -3,12 +3,13 @@
 include("lib/password.php");
 
 if ($_REQUEST['username'] && $_REQUEST['password']) {
-        $username = mysql_real_escape_string($_REQUEST['username']);
+        global $dbConn;
+	$username = mysql_real_escape_string($_REQUEST['username']);
         $pass = mysql_real_escape_string($_REQUEST['password']);
 	// Built-in hashing func
 	//$hash = password_hash($pass, PASSWORD_DEFAULT);
 	//print($hash);
-	$hash = getSingle("SELECT password FROM passwords WHERE username='$username'");
+	$hash = $dbConn->getSingle("SELECT password FROM passwords WHERE username='$username'");
 	if (password_verify($pass, $hash)) {
 		print("you are signed in");
 		// TODO: issue token
