@@ -13,7 +13,9 @@
 	print <<<EOF
 	<body style="background-color: #DDDDDD; margin-left: 20vw; margin-top: 10vh;"> 
 	<div style="background-color: white; 
-	padding: 20px; padding-bottom: 50px; border-radius: 10px; width: 60vw" class="mainContent post">
+	padding: 20px; padding-bottom: 50px; 
+	margin-bottom: 20px;
+	border-radius: 10px; width: 60vw" class="mainContent post">
 	<h3 style="margin-left: 10px">
 	$title
 	</h3>

@@ -48,7 +48,7 @@ EOF;
 
 
 	print <<<EOF
-	<div class="post">$post $date $like $dislike</div>		
+	<a href="post/$pid" style="text-decoration: none"><div class="post">$post $date $like $dislike</div></a>		
 EOF;
 }
 

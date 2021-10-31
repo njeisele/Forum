@@ -1,9 +1,14 @@
 <?php
 
 include("lib/password.php");
+require("authentication.php");
+
 
 if ($_REQUEST['username'] && $_REQUEST['password']) {
         global $dbConn;
+	echo('a');
+	echo exec('whoami'); 
+	echo('b');
 	$username = mysql_real_escape_string($_REQUEST['username']);
         $pass = mysql_real_escape_string($_REQUEST['password']);
 	// Built-in hashing func
@@ -12,8 +17,15 @@ if ($_REQUEST['username'] && $_REQUEST['password']) {
 	$hash = $dbConn->getSingle("SELECT password FROM passwords WHERE username='$username'");
 	if (password_verify($pass, $hash)) {
 		print("you are signed in");
-		// TODO: issue token
-		// TODO: redirect them to feed
+		$auth  = new Auth();
+		$token = $auth->issueToken($username);
+		echo $token;
+		print <<<EOF
+			<script>
+			localStorage.setItem("forumToken", "$token");
+			location.href = "/feed"; 
+			</script>
+EOF;
 	} else {
 		print("Incorrect user/pass");
 	}	
