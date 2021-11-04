@@ -1,4 +1,7 @@
 <?php
+	require("authentication.php");
+
+	
 	$parts = parse_url($URL);
 	$parts = explode("/", $parts['path']);
 	$postId = mysql_real_escape_string($parts[2]);
@@ -27,36 +30,35 @@
 EOF;
 
 
-
-        if($_REQUEST['text']) {
-		$text = mysql_real_escape_string($_REQUEST['text']);
+	if ($_REQUEST['token']  && $_REQUEST['text']) {
+		$auth = new Auth();
+		$decodedToken = $auth->verifyToken($_REQUEST['token']);
+		$username = mysql_real_escape_string($decodedToken->data->username);
+		$text = $_REQUEST['text'];
 		$date = Date("Y-m-d H:i:s");
-		$parts = parse_url($URL);
-		$parts = explode("/", $parts['path']);
-		$postId2 = mysql_real_escape_string($parts[2]);
-		
-		$dbConn->query("INSERT INTO replies(text, opid, date) values('$text', $postId, '$date')");
-	}
+                //$parts = parse_url($URL);
+	        //$parts = explode("/", $parts['path']);
+                //$postId2 = mysql_real_escape_string($parts[2]);
+	
+                $dbConn->query("INSERT INTO replies(text, opid, date, username) values('$text', $postId, '$date', '$username')");
+	}	
 
 	
-	// TODO: prevent > 1000 replies
+	// prevent > 1000 replies
 	$repliesResult = $dbConn->query("SELECT * FROM replies WHERE opid = $postId
 	ORDER BY date asc LIMIT 1000"); 
 
 	print "<div class=\"mainContent\">";
 while ($row = mysql_fetch_assoc($repliesResult)) {
-        $userName = $row['userId']; // need to query for the username, or could store username in this table
         $text = htmlspecialchars($row['text']);
         $date = htmlspecialchars($row['date']);
+	$username = htmlspecialchars($row['username']);
 	// TODO: likes/dislikes
 	print <<<EOF
 	<div style="background-color: white; border-radius: 10px; padding: 20px; 
 	width: 60vw; margin-bottom: 20px"> 
-	<h3>
-		$userName
-	</h3>	
-	<p> $text </p>
-	<p> $date </p>
+			<div style="width: 100%; display: inline"> <h6 style="display: inline-block; float: left">$username</h6> <p style="float: right; display: inline-block">$date</p></div>	
+			<p style="padding-top: 40px"> $text </p>
 	</div>
 EOF;
 }
@@ -64,6 +66,7 @@ EOF;
 print "</div>";
 
 print <<<EOF
+	   
            <form action=$postId method='POST'>
            <table style="margin-bottom: 5vh !important" class="mainContent">
                  <tr>
@@ -75,11 +78,21 @@ print <<<EOF
                  </tr>
                   <tr>
                   <td>
+		  <textarea style="display: none" name=token ></textarea>
           <button class="btn btn-primary" type="submit">Reply</button>
           </td>
           </tr>
           </table>
           </form>
+EOF;
+
+	// Sneaky token hide
+	print <<<EOF
+                <script>
+               		let x = document.getElementsByName("token")[0];
+			var value = localStorage.getItem("forumToken");
+			x.innerText = value;
+                </script>
 EOF;
 
 

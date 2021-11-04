@@ -18,10 +18,11 @@ function issueToken($username) {
 	$issuedAt = new DateTime('NOW');
 	// TODO: possible issue with this
 	// https://www.php.net/manual/en/class.datetime.php 
-	$expire = $issuedAt->modify('+6 minutes')->getTimestamp();
+	$expire = $issuedAt->modify('+100 minutes')->getTimestamp();
 	$tokenId    = base64_encode(openssl_random_pseudo_bytes(16));
 	// Fixes clock synch issue, otherwise can't decode token right after encoded
-	$notBefore = $issuedAt->modify('-20 minutes')->getTimestamp();
+	// TODO: There is some time issue with this
+	$notBefore = $issuedAt->modify('-110 minutes')->getTimestamp();
 	
 
 	$data = array(
@@ -45,7 +46,7 @@ function issueToken($username) {
 	return $jwt;
 }
 
-function verifyToken() {
+function verifyToken($jwt) {
 	$publicKeyFile = '/root/.ssh/rsa.public';
 
 	$publicKey = openssl_pkey_get_public (
@@ -53,9 +54,9 @@ function verifyToken() {
 	);
 
 
+	// This will error out if anything goes wrong, including expiration
 	$decoded = JWT::decode($jwt, $publicKey, array('RS256'));
-	// TODO: should error out if not valid
-	return true;
+	return $decoded;
 }
 
 }
