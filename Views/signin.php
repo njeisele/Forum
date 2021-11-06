@@ -4,25 +4,19 @@ include("lib/password.php");
 require("authentication.php");
 
 
-if ($_REQUEST['username'] && $_REQUEST['password']) {
+if (isset($_REQUEST['username']) && isset($_REQUEST['password'])) {
         global $dbConn;
-	echo('a');
-	echo exec('whoami'); 
-	echo('b');
 	$username = mysql_real_escape_string($_REQUEST['username']);
         $pass = mysql_real_escape_string($_REQUEST['password']);
 	// Built-in hashing func
-	//$hash = password_hash($pass, PASSWORD_DEFAULT);
-	//print($hash);
 	$hash = $dbConn->getSingle("SELECT password FROM passwords WHERE username='$username'");
 	if (password_verify($pass, $hash)) {
-		print("you are signed in");
 		$auth  = new Auth();
 		$token = $auth->issueToken($username);
-		echo $token;
 		print <<<EOF
 			<script>
 			localStorage.setItem("forumToken", "$token");
+			localStorage.setItem("forumUsername", "$username");
 			location.href = "/feed"; 
 			</script>
 EOF;

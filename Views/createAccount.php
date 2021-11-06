@@ -14,7 +14,7 @@ function validatePasswords($pass1, $pass2) {
 	return false;
 }
 
-if ($_REQUEST['username'] && $_REQUEST['password'] && $_REQUEST['password2']) {
+if (isset($_REQUEST['username']) && isset($_REQUEST['password']) && isset($_REQUEST['password2'])) {
  	
 	global $dbConn;
         $username = mysql_real_escape_string($_REQUEST['username']);

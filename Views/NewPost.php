@@ -1,5 +1,8 @@
 <?php
 
+	include("Views/header.php");
+
+	
 	function isAllowedToPost($uid) {
         	global $dbConn;
         	/* prevent same user from posting too often */
@@ -22,7 +25,7 @@
 	}
 
 	
-	if($_REQUEST['post'] && $_REQUEST['postTitle']) {
+	if(isset($_REQUEST['post']) && isset($_REQUEST['postTitle'])) {
         	global $dbConn;
         	$post = mysql_real_escape_string($_REQUEST['post']);
 		$postTitle = mysql_real_escape_string($_REQUEST['postTitle']);
@@ -54,9 +57,13 @@ EOF;
 		<tr>
                 <td>
                 <div class="form-floating">
-                <textarea placeholder="meme" style="margin-bottom: 10px; height: 10vh" name=postTitle class="form-control" id="floatingTextArea"></textarea>
-		<textarea style="margin-bottom: 50px; height: 30vh" name=post class="form-control"  id="floatingTextArea"></textarea>
-                </div>
+                <input placeholder="Title" style="margin-bottom: 10px; height: 10vh" name="postTitle" class="form-control" id="floatingTextInput"></input>
+		<label for="floatingTextInput">Title</label>
+		</div>
+		<div class="form-floating">
+		<textarea placeholder="Enter your post here" style="margin-bottom: 50px; height: 30vh" name="post" class="form-control" id="floatingTextArea"></textarea>
+                <label for="floatingTextArea">Post</label>
+		</div>
                 </td>
 		</tr>
 		<tr>

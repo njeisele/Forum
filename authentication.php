@@ -2,7 +2,7 @@
 
 require __DIR__ . '/vendor/autoload.php';
 
-declare(strict_types=1);
+//declare(strict_types=1);
 
 use Firebase\JWT\JWT;
 

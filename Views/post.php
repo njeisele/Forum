@@ -14,7 +14,16 @@
 	
 	$text = $row['post'];
 	print <<<EOF
-	<body style="background-color: #DDDDDD; margin-left: 20vw; margin-top: 10vh;"> 
+	<body style="background-color: #DDDDDD">
+	
+EOF;
+	include("header.php");
+	print <<<EOF
+	<div style="margin-left: 20vw; margin-top: 10vh;"> 
+
+EOF;
+
+print <<<EOF
 	<div style="background-color: white; 
 	padding: 20px; padding-bottom: 50px; 
 	margin-bottom: 20px;
@@ -28,9 +37,9 @@
 	</div>
 	</body>
 EOF;
-
-
-	if ($_REQUEST['token']  && $_REQUEST['text']) {
+	
+	
+	if (isset($_REQUEST['token']) && isset($_REQUEST['text'])) {
 		$auth = new Auth();
 		$decodedToken = $auth->verifyToken($_REQUEST['token']);
 		$username = mysql_real_escape_string($decodedToken->data->username);
@@ -59,6 +68,11 @@ while ($row = mysql_fetch_assoc($repliesResult)) {
 	width: 60vw; margin-bottom: 20px"> 
 			<div style="width: 100%; display: inline"> <h6 style="display: inline-block; float: left">$username</h6> <p style="float: right; display: inline-block">$date</p></div>	
 			<p style="padding-top: 40px"> $text </p>
+
+	<a class="fa fa-thumbs-up" style="cursor: pointer; text-decoration: none; font-size:20px;color:green"></a>
+	<p style="margin-right: 10px; display: inline-block;">2</p>
+	<a class="fa fa-thumbs-down" style="cursor: pointer; text-decoration: none; font-size:20px;color:red"></a>
+	0
 	</div>
 EOF;
 }
