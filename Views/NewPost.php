@@ -7,7 +7,7 @@
 	function isAllowedToPost($uid, $username) {
         	global $dbConn;
         	/* prevent same user from posting too often */
-        	$maxPostsPerMinute = 3;
+        	$maxPostsPerMinute = -1;
         	$dateOneMinuteAgo = mysql_real_escape_string(date('Y-m-d H:i:s', strtotime('-1 minute')));
 		$result = $dbConn->query("SELECT COUNT(*) from posts WHERE (username = '$username' OR uid = $uid) and date > '$dateOneMinuteAgo'");
                 $count = mysql_fetch_row($result)[0];
@@ -57,11 +57,8 @@ EOF;
 			</script>  
 EOF;
 		} else {
-		print("You have posted too many times in the past minute, please wait and try again");
-		print <<<EOF
-			<img src="https://i.pinimg.com/originals/0f/a5/10/0fa510b2f6630a7b80e227d77c7679f3.jpg" />			
-EOF;
-        	}
+			include("tooManyPosts.php");
+		}
 	}
 	
 	print <<<EOF

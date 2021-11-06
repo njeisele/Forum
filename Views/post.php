@@ -68,10 +68,7 @@ EOF;
 		// Below query, null title, 0 for isTopic
    	             $dbConn->query("INSERT INTO posts(text, title, isTopic, opid, date, username, uid) values('$text', NULL, 0, $postId, '$date', '$username', $uid)");
 		} else {
-		 print("You have posted too many times in the past minute, please wait and try again");
-                 print <<<EOF
-                        <img src="https://i.pinimg.com/originals/0f/a5/10/0fa510b2f6630a7b80e227d77c7679f3.jpg" />
-EOF;
+			include("tooManyPosts.php");
 		}
 	}	
 
