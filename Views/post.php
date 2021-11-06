@@ -2,6 +2,18 @@
 	require("authentication.php");
 
 	
+	 function isAllowedToPost($uid, $username) {
+                global $dbConn;
+                /* prevent same user from posting too often */
+                $maxPostsPerMinute = 10;
+                $dateOneMinuteAgo = mysql_real_escape_string(date('Y-m-d H:i:s', strtotime('-1 minute')));
+                $result = $dbConn->query("SELECT COUNT(*) from posts WHERE (username = '$username' OR uid = $uid) and date > '$dateOneMinuteAgo'");
+		$count = mysql_fetch_row($result)[0];
+                return ($count <= $maxPostsPerMinute);
+        }
+
+
+
 	$parts = parse_url($URL);
 	$parts = explode("/", $parts['path']);
 	$postId = mysql_real_escape_string($parts[2]);
@@ -11,8 +23,9 @@
 	$post = $dbConn->query("SELECT * FROM posts WHERE pid = $postId LIMIT 1");
 	$row = mysql_fetch_assoc($post);
 	$title = $row['title'];
-	
-	$text = $row['post'];
+
+		
+	$text = $row['text'];
 	print <<<EOF
 	<body style="background-color: #DDDDDD">
 	
@@ -45,16 +58,26 @@ EOF;
 		$username = mysql_real_escape_string($decodedToken->data->username);
 		$text = $_REQUEST['text'];
 		$date = Date("Y-m-d H:i:s");
-                //$parts = parse_url($URL);
-	        //$parts = explode("/", $parts['path']);
-                //$postId2 = mysql_real_escape_string($parts[2]);
-	
-                $dbConn->query("INSERT INTO replies(text, opid, date, username) values('$text', $postId, '$date', '$username')");
+                $ip = mysql_real_escape_string($_SERVER['REMOTE_ADDR']);
+                $uid = $dbConn->getSingle("select uid from users where ip = '".$ip."'");
+                if (!$uid) {
+                        // New IP
+                        $dbConn->query("insert into users (ip) values ('$ip')");
+                }
+                if (isAllowedToPost($uid, $username)) {
+		// Below query, null title, 0 for isTopic
+   	             $dbConn->query("INSERT INTO posts(text, title, isTopic, opid, date, username, uid) values('$text', NULL, 0, $postId, '$date', '$username', $uid)");
+		} else {
+		 print("You have posted too many times in the past minute, please wait and try again");
+                 print <<<EOF
+                        <img src="https://i.pinimg.com/originals/0f/a5/10/0fa510b2f6630a7b80e227d77c7679f3.jpg" />
+EOF;
+		}
 	}	
 
 	
 	// prevent > 1000 replies
-	$repliesResult = $dbConn->query("SELECT * FROM replies WHERE opid = $postId
+	$repliesResult = $dbConn->query("SELECT * FROM posts WHERE opid = $postId
 	ORDER BY date asc LIMIT 1000"); 
 
 	print "<div class=\"mainContent\">";

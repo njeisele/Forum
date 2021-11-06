@@ -1,19 +1,25 @@
 <?php
 
 	include("Views/header.php");
-
+	require("authentication.php");
 	
-	function isAllowedToPost($uid) {
+	// Check if this username or IP has exceeded the post limite
+	function isAllowedToPost($uid, $username) {
         	global $dbConn;
         	/* prevent same user from posting too often */
         	$maxPostsPerMinute = 3;
         	$dateOneMinuteAgo = mysql_real_escape_string(date('Y-m-d H:i:s', strtotime('-1 minute')));
-        	$result = $dbConn->getSingle("SELECT COUNT(*) from posts WHERE uid = $uid and date > '$dateOneMinuteAgo'");
-        	return ($result <= $maxPostsPerMinute);
+		$result = $dbConn->query("SELECT COUNT(*) from posts WHERE (username = '$username' OR uid = $uid) and date > '$dateOneMinuteAgo'");
+                $count = mysql_fetch_row($result)[0];
+                return ($count <= $maxPostsPerMinute);
 	}
 
-	isAllowedToPost(getUid());
+	//isAllowedToPost(getUid());
         
+	// TODO: Just going to rate-limit by username for now, but it prob would also be good to do this by IP
+	// so they can't make a bunch of accounts from one IP
+	
+	
 	function getUid() {
 		global $dbConn;
 		$ip = mysql_real_escape_string($_SERVER['REMOTE_ADDR']);
@@ -23,21 +29,28 @@
 		}
 		return $uid;
 	}
-
 	
-	if(isset($_REQUEST['post']) && isset($_REQUEST['postTitle'])) {
+	print <<<EOF
+	<body style="background-color: #DDDDDD">
+EOF;
+	
+	if(isset($_REQUEST['post']) && isset($_REQUEST['postTitle']) && isset($_REQUEST['token'])) {
         	global $dbConn;
-        	$post = mysql_real_escape_string($_REQUEST['post']);
+		$auth = new Auth();
+                $decodedToken = $auth->verifyToken($_REQUEST['token']);
+                $username = mysql_real_escape_string($decodedToken->data->username);
+        	
+		$post = mysql_real_escape_string($_REQUEST['post']);
 		$postTitle = mysql_real_escape_string($_REQUEST['postTitle']);
         	$ip = mysql_real_escape_string($_SERVER['REMOTE_ADDR']);
         	$uid = $dbConn->getSingle("select uid from users where ip = '".$ip."'");
         	if (!$uid) {
-                	/* New user */
+             		// New IP
                 	$dbConn->query("insert into users (ip) values ('$ip')");
         	}
         	$date = Date("Y-m-d H:i:s");
-        	if (isAllowedToPost($uid)) {
-                	$dbConn->query("insert into posts (uid, post, date, title) values ($uid, '$post', '$date', '$postTitle')");
+        	if (isAllowedToPost($uid, $username)) {
+                	$dbConn->query("insert into posts (title, text, isTopic, username, date, uid) values ('$postTitle', '$post', 1, '$username', '$date', $uid)");
 		print <<<EOF
 			<script type="text/javascript">
 				window.location.href = '/feed'; 
@@ -68,6 +81,7 @@ EOF;
 		</tr>
 		<tr>
 		<td>
+		<textarea style="display: none" name=token ></textarea>
         <button class="btn btn-primary" type="submit">Post</button>
         </td>
         </tr>
@@ -75,5 +89,15 @@ EOF;
         </form>
 
 EOF;
+	// Token hide
+	print <<<EOF
+                <script>
+                        let x = document.getElementsByName("token")[0];
+                        var value = localStorage.getItem("forumToken");
+                        x.innerText = value;
+                </script>
+EOF;
+
+
 
 ?>	

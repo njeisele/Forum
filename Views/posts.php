@@ -1,7 +1,7 @@
 <?php
 
 // TODO: this is re-used in new post, should be moved elsewhere
-function getUid() {
+/*function getUid() {
 	global $dbConn;
 	$ip = mysql_real_escape_string($_SERVER['REMOTE_ADDR']);
 	$uid = $dbConn->getSingle("select uid from users where ip ='".$ip."'");
@@ -9,7 +9,8 @@ function getUid() {
 		$dbConn->query("insert into users(ip) values('$ip')");
 	}
 	return $uid;
-}
+}*/
+
 
 // TODO: Move this vote logic to the replies page
 
@@ -38,13 +39,13 @@ print <<<EOF
 EOF;
 
 
-$result = $dbConn->query("select * from posts order by date desc LIMIT 10");
+$result = $dbConn->query("select * from posts WHERE isTopic = 1 order by date desc LIMIT 10");
 print "<div class=\"feed mainContent\">";
 while ($row = mysql_fetch_assoc($result)) {
-	$uid = $row['uid'];
+	$uid = $row['username'];
 	$pid = $row['pid'];
 	$title = $row['title'];
-	$post = htmlspecialchars($row['post']);
+	$post = htmlspecialchars($row['text']);
 	$date = $row['date'];
 	$likeString = 'like';
 	$dislikeString = 'dislike';
