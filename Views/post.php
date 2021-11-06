@@ -12,6 +12,23 @@
                 return ($count <= $maxPostsPerMinute);
         }
 
+	function getVoteCount($vote, $pid) {
+		global $dbConn;
+		$result = $dbConn->getSingle("SELECT COUNT(*) from votes WHERE
+					      pid = $pid AND status = '$vote'");
+		return $result;
+	}	
+
+	if (isset($_REQUEST['vote']) && isset($_REQUEST['pid']) && isset($_REQUEST['username'])) {
+        	global $dbConn;
+        	$vote = mysql_real_escape_string($_REQUEST['vote']);
+        	$pid = mysql_real_escape_string($_REQUEST['pid']);
+		$username = mysql_real_escape_string($_REQUEST['username']);
+       		$dbConn->query("insert into votes(username, pid, status) values('$username', $pid, '$vote')");
+        	// Update in case already exists
+        	$dbConn->query("update votes SET status='$vote' WHERE username = '$username' and pid = $pid");            
+	}
+
 
 
 	$parts = parse_url($URL);
@@ -30,6 +47,22 @@
 	<body style="background-color: #DDDDDD">
 	
 EOF;
+
+	 print <<<EOF
+		<script>
+        document.addEventListener("DOMContentLoaded", function(event) { 
+            var scrollpos = localStorage.getItem('scrollpos');
+            if (scrollpos) window.scrollTo(0, scrollpos, {duration: 0} );
+        });
+
+        window.onbeforeunload = function(e) {
+            localStorage.setItem('scrollpos', window.scrollY);
+        };
+    </script>
+
+EOF;
+
+
 	include("header.php");
 	print <<<EOF
 	<div style="margin-left: 20vw; margin-top: 10vh;"> 
@@ -82,17 +115,24 @@ while ($row = mysql_fetch_assoc($repliesResult)) {
         $text = htmlspecialchars($row['text']);
         $date = htmlspecialchars($row['date']);
 	$username = htmlspecialchars($row['username']);
-	// TODO: likes/dislikes
+	$pid = htmlspecialchars($row['pid']);	
+	
+	$likeString = 'like';
+        $dislikeString = 'dislike';
+	
+	$likeCount = getVoteCount($likeString, $pid);
+	$dislikeCount = getVoteCount($dislikeString, $pid);
+
 	print <<<EOF
 	<div style="background-color: white; border-radius: 10px; padding: 20px; 
 	width: 60vw; margin-bottom: 20px"> 
 			<div style="width: 100%; display: inline"> <h6 style="display: inline-block; float: left">$username</h6> <p style="float: right; display: inline-block">$date</p></div>	
 			<p style="padding-top: 40px"> $text </p>
 
-	<a class="fa fa-thumbs-up" style="cursor: pointer; text-decoration: none; font-size:20px;color:green"></a>
-	<p style="margin-right: 10px; display: inline-block;">2</p>
-	<a class="fa fa-thumbs-down" style="cursor: pointer; text-decoration: none; font-size:20px;color:red"></a>
-	0
+	<a href="/post/$postId?vote=$likeString&pid=$pid&username=$username"   class="fa fa-thumbs-up" style="cursor: pointer; text-decoration: none; font-size:20px;color:green"></a>
+	<p style="margin-right: 10px; display: inline-block;">$likeCount</p>
+	<a href="/post/$postId?vote=$dislikeString&pid=$pid&username=$username"  class="fa fa-thumbs-down" style="cursor: pointer; text-decoration: none; font-size:20px;color:red"></a>
+	$dislikeCount
 	</div>
 EOF;
 }

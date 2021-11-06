@@ -55,7 +55,17 @@ function verifyToken($jwt) {
 
 
 	// This will error out if anything goes wrong, including expiration
-	$decoded = JWT::decode($jwt, $publicKey, array('RS256'));
+	try {
+		$decoded = JWT::decode($jwt, $publicKey, array('RS256'));
+	} catch (Firebase\JWT\ExpiredException $e) {
+		print <<<EOF
+		<script>
+			alert("Your session has expired, please sign in again.");
+			location.href = "/signin";
+		</script>
+EOF;
+		throw new Exception("expired token");
+	}
 	return $decoded;
 }
 
