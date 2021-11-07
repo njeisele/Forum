@@ -19,6 +19,7 @@
 		return $result;
 	}	
 
+	// TODO: Currently this is recieving the user who is being liked, needs to be fixed
 	if (isset($_REQUEST['vote']) && isset($_REQUEST['pid']) && isset($_REQUEST['username'])) {
         	global $dbConn;
         	$vote = mysql_real_escape_string($_REQUEST['vote']);
@@ -40,7 +41,8 @@
 	$post = $dbConn->query("SELECT * FROM posts WHERE pid = $postId LIMIT 1");
 	$row = mysql_fetch_assoc($post);
 	$title = $row['title'];
-
+	$opidUser = $row['username'];
+	$opidDate = $row['date'];
 		
 	$text = $row['text'];
 	print <<<EOF
@@ -69,17 +71,30 @@ EOF;
 
 EOF;
 
+	$likeString = 'like';
+        $dislikeString = 'dislike';
+        $opidLikeCount = getVoteCount($likeString, $postId);
+        $opidDislikeCount = getVoteCount($dislikeString, $postId);
+
+
 print <<<EOF
 	<div style="background-color: white; 
-	padding: 20px; padding-bottom: 50px; 
+	padding: 20px; padding-bottom: 20px; 
 	margin-bottom: 20px;
 	border-radius: 10px; width: 60vw" class="mainContent post">
-	<h3 style="margin-left: 10px">
+	<h6>$opidUser</h6>
+	<h3 style="">
 	$title
 	</h3>
-	<p style="margin-left: 10px">
+	<p style="float: right"> $opidDate </p>
+	<br />
+	<p style=" overflow-wrap: anywhere">
 	$text
 	</p>
+	<a href="/post/$postId?vote=$likeString&pid=$postId&username=$opidUser"   class="fa fa-thumbs-up" style="cursor: pointer; text-decoration: none; font-size:20px;color:green"></a>
+        <p style="margin-right: 10px; display: inline-block;">$opidLikeCount</p>
+        <a href="/post/$postId?vote=$dislikeString&pid=$postId&username=$opidUser"  class="fa fa-thumbs-down" style="cursor: pointer; text-decoration: none; font-size:20px;color:red"></a>
+        $opidDislikeCount
 	</div>
 	</body>
 EOF;
@@ -127,7 +142,7 @@ while ($row = mysql_fetch_assoc($repliesResult)) {
 	<div style="background-color: white; border-radius: 10px; padding: 20px; 
 	width: 60vw; margin-bottom: 20px"> 
 			<div style="width: 100%; display: inline"> <h6 style="display: inline-block; float: left">$username</h6> <p style="float: right; display: inline-block">$date</p></div>	
-			<p style="padding-top: 40px"> $text </p>
+			<p style="overflow-wrap: anywhere; padding-top: 40px"> $text </p>
 
 	<a href="/post/$postId?vote=$likeString&pid=$pid&username=$username"   class="fa fa-thumbs-up" style="cursor: pointer; text-decoration: none; font-size:20px;color:green"></a>
 	<p style="margin-right: 10px; display: inline-block;">$likeCount</p>

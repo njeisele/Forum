@@ -34,7 +34,7 @@ switch ($parts[1]) {
 		include("Views/post.php");
 		break;
 	case "feed":
-		include('Views/posts.php');
+		include('Views/feed.php');
 		break;
 	case "signin":
 		include('Views/signin.php');

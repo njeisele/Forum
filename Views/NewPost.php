@@ -7,7 +7,7 @@
 	function isAllowedToPost($uid, $username) {
         	global $dbConn;
         	/* prevent same user from posting too often */
-        	$maxPostsPerMinute = -1;
+        	$maxPostsPerMinute = 5;
         	$dateOneMinuteAgo = mysql_real_escape_string(date('Y-m-d H:i:s', strtotime('-1 minute')));
 		$result = $dbConn->query("SELECT COUNT(*) from posts WHERE (username = '$username' OR uid = $uid) and date > '$dateOneMinuteAgo'");
                 $count = mysql_fetch_row($result)[0];
